@@ -25,6 +25,6 @@ impl HighScores {
     pub fn personal_top_three(&self) -> Vec<u32> {
         let mut scores = self.scores.clone();
         scores.sort();
-        scores.iter().rev().take(3).copied().collect()
+        scores.into_iter().rev().take(3).collect()
     }
 }

@@ -8,9 +8,7 @@ pub enum Comparison {
 
 fn is_sublist<T: PartialEq>(f: &[T], s: &[T]) -> bool {
     if s.len() <= f.len() { return false }
-    (0..=s.len()-f.len())
-        .map(|n| s.iter().skip(n))
-        .any(|l| l.zip(f).all(|(a, b)| a == b))
+    s.windows(f.len()).any(|w| w == f)
 }
 
 pub fn sublist<T: PartialEq>(first_list: &[T], second_list: &[T]) -> Comparison {

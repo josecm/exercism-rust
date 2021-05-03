@@ -4,39 +4,25 @@
 // Normally, it's good practice to just do what Clippy tells you, but in this
 // case, we want to keep things relatively simple. The `Default` trait is not the point
 // of this exercise.
+
+use std::collections::{BTreeMap, BTreeSet};
+
 #[allow(clippy::new_without_default)]
 pub struct School {
-    students: Vec<Student>,
-}
-
-#[derive(Clone)]
-struct Student {
-    name: String,
-    grade: u32,
+     grades: BTreeMap<u32, BTreeSet<String>>,
 }
 
 impl School {
     pub fn new() -> School {
-        School { students: vec![] }
+        School { grades: BTreeMap::new() }
     }
 
     pub fn add(&mut self, grade: u32, student: &str) {
-        self.students.push(Student {
-            grade,
-            name: student.to_string(),
-        })
+        self.grades.entry(grade).or_default().insert(student.to_string());
     }
 
     pub fn grades(&self) -> Vec<u32> {
-        let mut students = self
-            .students
-            .iter()
-            .cloned()
-            .map(|s| s.grade)
-            .collect::<Vec<u32>>();
-        students.sort();
-        students.dedup();
-        students
+        self.grades.keys().copied().collect()
     }
 
     // If `grade` returned a reference, `School` would be forced to keep a `Vec<String>`
@@ -44,14 +30,9 @@ impl School {
     // the internal structure can be completely arbitrary. The tradeoff is that some data
     // must be copied each time `grade` is called.
     pub fn grade(&self, grade: u32) -> Vec<String> {
-        let mut students = self
-            .students
-            .iter()
-            .cloned()
-            .filter(|s| s.grade == grade)
-            .map(|s| s.name)
-            .collect::<Vec<String>>();
-        students.sort();
-        students
+        match self.grades.get(&grade) {
+            Some(students) => students.iter().cloned().collect(),
+            None => Vec::new(),
+        }
     }
 }

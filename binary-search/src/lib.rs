@@ -1,4 +1,10 @@
-pub fn find(array: &[i32], key: i32) -> Option<usize> {
+pub fn find<T, U>(array: U, key: T) -> Option<usize>
+where
+    T: PartialOrd,
+    U: AsRef<[T]>,
+{
+    let array = array.as_ref();
+
     if array.is_empty() {
         return None;
     }

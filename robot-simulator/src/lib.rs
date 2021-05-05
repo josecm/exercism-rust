@@ -58,16 +58,12 @@ impl Robot {
     }
 
     pub fn instructions(self, instructions: &str) -> Self {
-        let mut robot = self;
-        for i in instructions.chars() {
-            robot = match i {
+        instructions.chars().fold(self, |robot, i| match i {
                 'A' => robot.advance(),
                 'L' => robot.turn_left(),
                 'R' => robot.turn_right(),
                 _ => panic!("unknown instruction \'{}\'", i),
-            };
-        }
-        robot
+        })
     }
 
     pub fn position(&self) -> (i32, i32) {

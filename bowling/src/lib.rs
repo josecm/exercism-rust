@@ -37,9 +37,9 @@ impl BowlingGame {
 
         self.pins_up -= pins;
         self.points += pins * (1 + self.bonus.0);
-
         if self.fill_balls > 0 { self.fill_balls -= 1; }
         self.bonus = (self.bonus.1, 0);
+
         if self.frame_first_throw {
             if self.pins_up == 0 {
                 self.pins_up = 10;

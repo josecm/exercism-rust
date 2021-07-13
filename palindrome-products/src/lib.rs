@@ -1,50 +1,59 @@
-#![feature(map_first_last)]
-
-use std::collections::HashSet;
-
 #[derive(Debug, PartialEq, Eq)]
 pub struct Palindrome {
-    value: u64,
-    factors: HashSet<(u64, u64)>,
+    factors: Vec<(u64, u64)>,
 }
 
 impl Palindrome {
     pub fn new(a: u64, b: u64) -> Palindrome {
         Self {
-            value: a * b,
-            factors: vec![(a,b)].into_iter().collect::<HashSet<_>>(),
+            factors: vec![(a, b)],
         }
     }
 
     pub fn value(&self) -> u64 {
-        self.value
+        assert!(self.factors.len() > 0);
+        self.factors[0].0 * self.factors[0].1
     }
 
     pub fn insert(&mut self, a: u64, b: u64) {
-        self.factors.insert((a, b));
+        self.factors.push((a, b));
     }
 }
 
-fn is_palindrome(n: &u64) -> bool {
-    let n = n.to_string();
-    let rev = n.chars().rev().collect::<String>();
-    n == rev
+fn is_palindrome(n: u64) -> bool {
+    let mut tmp = n;
+    let mut m = 0;
+    while tmp > 0 {
+        m = m * 10 + tmp % 10;
+        tmp = tmp / 10;
+    }
+    n == m
 }
 
 pub fn palindrome_products(min: u64, max: u64) -> Option<(Palindrome, Palindrome)> {
     let mut products = (min..=max)
-        .flat_map(|a| (a..=max).map(move |b| (a*b, (a, b)))).collect::<Vec<_>>();
-    products.sort_by_key(|(n, _)| *n);
-    let min_palindrome = products.iter().filter(|(n,_)| is_palindrome(n)).next()?;
-    let max_palindrome = products.iter().rev().filter(|(n,_)| is_palindrome(n)).next()?; 
-    let mut min_palindrome = Palindrome::new(min_palindrome.1.0, min_palindrome.1.1); 
-    let mut max_palindrome = Palindrome::new(max_palindrome.1.0, max_palindrome.1.1); 
-    for (n, (a,b)) in products {
-        if n == min_palindrome.value() {
-            min_palindrome.insert(a, b);
-        } else if n == max_palindrome.value() {
-            max_palindrome.insert(a, b);
-        }
-    }
-    Some((min_palindrome, max_palindrome))
+        .flat_map(|a| (a..=max).map(move |b| (a, b)))
+        .filter(|(a, b)| is_palindrome(a * b))
+        .collect::<Vec<_>>();
+    products.sort_by_key(|(a, b)| a * b);
+    let min = products.first()?;
+    let max = products.last()?;
+    let min_factors = products
+        .iter()
+        .copied()
+        .take_while(|(a, b)| a * b == min.0 * min.1)
+        .collect::<Vec<_>>();
+    let max_factors = products
+        .iter()
+        .copied()
+        .skip_while(|(a, b)| a * b != max.0 * max.1)
+        .collect::<Vec<_>>();
+    Some((
+        Palindrome {
+            factors: min_factors,
+        },
+        Palindrome {
+            factors: max_factors,
+        },
+    ))
 }
